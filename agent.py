@@ -9,7 +9,7 @@ llm_cfg = {
 
 bot = Assistant(
     llm=llm_cfg,
-    function_list=["code_interpreter"],  # add more tools here as you build them
+    function_list=[],  # code_interpreter needs Docker-in-Docker, not set up here
 )
 
 if __name__ == "__main__":

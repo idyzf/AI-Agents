@@ -1,3 +1,31 @@
-qwen-agent
 openai
+numpy
+soundfile
+tqdm
+python-dateutil
 discord.py>=2.3
+
+qwen-agent
+
+# Code Interpreter & Python Executor dependencies
+python-dateutil
+matplotlib
+numpy
+pandas
+pillow
+scipy
+sympy
+
+# Audio & Multimodal Dependencies
+soundfile
+
+# Web, API & Async Tools
+requests
+pydantic
+aiohttp
+
+
+# Document & Search Utilities
+pypdf
+docx2txt
+beautifulsoup4

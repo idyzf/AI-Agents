@@ -13,6 +13,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     python3-pip \
     zstd \
+    libsndfile1 \
+    libfreetype6-dev \
+    libpng-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Installs the ollama binary + CLI directly inside this Linux container.
@@ -21,7 +24,7 @@ RUN curl -fsSL https://ollama.com/install.sh | sh
 COPY requirements.txt .
 RUN pip3 install --no-cache-dir -r requirements.txt
 
-COPY agent.py entrypoint.sh ./
+COPY agent.py discord_bot.py entrypoint.sh ./
 RUN chmod +x entrypoint.sh
 
 ENV OLLAMA_BASE_URL=http://localhost:11434/v1

@@ -2,7 +2,9 @@ import os
 import discord
 from qwen_agent.agents import Assistant
 
+
 DISCORD_TOKEN = os.environ["DISCORD_TOKEN"]
+
 
 llm_cfg = {
     "model": os.environ.get("MODEL_NAME", "qwen2.5:7b-instruct"),
@@ -12,7 +14,9 @@ llm_cfg = {
 
 bot_agent = Assistant(
     llm=llm_cfg,
-    function_list=["code_interpreter"],  # add more tools here as you build them
+    function_list=[],  # add tools here later (e.g. MCP servers) — code_interpreter
+                       # is skipped since it needs Docker-in-Docker to sandbox code,
+                       # which isn't set up in this container
 )
 
 intents = discord.Intents.default()
