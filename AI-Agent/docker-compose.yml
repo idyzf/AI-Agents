@@ -1,0 +1,12 @@
+services:
+  agent:
+    build: .
+    environment:
+      - MODEL_NAME=qwen2.5:7b-instruct
+    volumes:
+      - ollama-models:/root/.ollama
+    stdin_open: true
+    tty: true
+
+volumes:
+  ollama-models:
