@@ -1,14 +1,13 @@
 services:
-  agent:
+  bot:
     build: .
     environment:
-      - MODEL_NAME=qwen2.5:7b-instruct
+      # Swap for qwen3.5:9b for better answers (~6 GB RAM instead of ~3 GB).
+      - MODEL_NAME=qwen3.5:4b
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434/v1
+      - ENABLE_THINKING=false
     env_file:
-      - .env
-    volumes:
-      - ollama-models:/root/.ollama
-    stdin_open: true
-    tty: true
- 
-volumes:
-  ollama-models:
+      - .env  # DISCORD_TOKEN=... and optionally ALLOWED_USER_IDS=123,456
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    mem_limit: 512m
