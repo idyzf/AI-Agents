@@ -8,7 +8,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY agent.py discord_bot.py ./
+COPY agent.py discord_bot.py briefing.py google_readonly.py ./
 
 # Run as an unprivileged user inside the container. qwen-agent writes a
 # ./workspace folder at startup, so the user needs to own /app.

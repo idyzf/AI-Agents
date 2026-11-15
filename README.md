@@ -28,6 +28,27 @@ O Ollama tira o modelo da memória depois de cerca de 5 minutos sem uso.
 - `!reset` apaga a memória da conversa no canal.
 - `!<agente> mensagem` fala com um agente específico.
 
+## Assistente de agenda e emails
+
+Todo dia às 7h (horário de Brasília), o bot manda por DM os eventos do dia e um resumo dos emails das últimas 24h. Na segunda, manda também a agenda da semana. Na DM, você também pode pedir na hora: `!hoje`, `!semana`, `!emails` ou `!bomdia`. Esses comandos só funcionam para o dono do bot.
+
+**Ele só lê, nunca altera nada:**
+- O token do Google tem só permissões de leitura (`calendar.readonly` e `gmail.readonly`). O próprio Google recusa qualquer tentativa de apagar, editar ou enviar.
+- O bot se recusa a rodar se o token tiver qualquer permissão além dessas.
+- O modelo que escreve os resumos não tem ferramentas: só recebe texto e devolve texto.
+- A pasta `secrets/` entra no container como somente-leitura e não vai para o git.
+
+**Configuração (uma vez):**
+1. Em https://console.cloud.google.com, crie um projeto e ative a **Gmail API** e a **Google Calendar API**.
+2. Em "Google Auth Platform", configure a tela de consentimento como **External** e adicione seu email como usuário de teste.
+3. Crie um **OAuth client ID** do tipo **Desktop app**, baixe o JSON e salve como `secrets/credentials.json`.
+4. No Mac, rode `pip3 install google-auth-oauthlib google-api-python-client` e depois `python3 auth_google.py`. Faça login e aprove o acesso somente-leitura.
+5. Reinicie o bot: `docker compose up --build`.
+
+Enquanto o app estiver em modo "Testing" no Google, o login expira a cada 7 dias e é preciso rodar `auth_google.py` de novo. Para não expirar, mude o app para "In production". O Google vai mostrar um aviso de "app não verificado", que você pode aceitar, já que o app é seu.
+
+Se o Mac estiver dormindo às 7h, o resumo daquele dia não é enviado. Use `!bomdia` quando abrir o Mac.
+
 ## Criando agentes
 
 Adicione uma entrada em `AGENTS` no `agent.py`, com o papel do agente e as ferramentas dele. Ele já fica disponível como `!nome` no Discord.

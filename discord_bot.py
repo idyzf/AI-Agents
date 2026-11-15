@@ -1,9 +1,12 @@
 import asyncio
+import datetime as dt
 import os
 import urllib.request
 
 import discord
+from discord.ext import tasks
 
+import briefing
 from agent import AGENTS, MODEL_NAME, OLLAMA_BASE_URL, make_agent, run_agent
 
 DISCORD_TOKEN = os.environ["DISCORD_TOKEN"]
@@ -15,6 +18,17 @@ ALLOWED_USER_IDS = {
 }
 
 MAX_HISTORY_MESSAGES = 20
+
+# Who gets the calendar/email briefings by DM. Defaults to the owner of the
+# Discord application (you), so nobody else can ever receive or request them.
+OWNER_USER_ID = int(os.environ["OWNER_USER_ID"]) if os.environ.get("OWNER_USER_ID") else None
+BRIEFING_HOUR, BRIEFING_MINUTE = (int(x) for x in os.environ.get("BRIEFING_TIME", "07:00").split(":"))
+BRIEFING_COMMANDS = {
+    "!hoje": lambda: [f"{briefing._safe(briefing.events_today)}\n\n{briefing._safe(briefing.emails_summary)}"],
+    "!semana": lambda: [briefing._safe(briefing.events_week)],
+    "!emails": lambda: [briefing._safe(briefing.emails_summary)],
+    "!bomdia": briefing.morning_messages,
+}
 
 agents = {name: make_agent(name) for name in AGENTS}
 
@@ -50,10 +64,35 @@ def parse_command(text: str) -> tuple[str, str]:
     return "default", text
 
 
+async def send_chunks(channel, text: str) -> None:
+    # Discord caps messages at 2000 chars.
+    for i in range(0, len(text), 1900):
+        await channel.send(text[i:i + 1900])
+
+
+async def build_messages(fn) -> list[str]:
+    async with model_lock:
+        return await asyncio.to_thread(fn)
+
+
+@tasks.loop(time=dt.time(BRIEFING_HOUR, BRIEFING_MINUTE, tzinfo=briefing.TZ))
+async def morning_briefing():
+    owner = await client.fetch_user(OWNER_USER_ID)
+    for text in await build_messages(briefing.morning_messages):
+        await send_chunks(owner, text)
+    print(f"Resumo da manhã enviado ({dt.datetime.now(briefing.TZ):%d/%m %H:%M})")
+
+
 @client.event
 async def on_ready():
+    global OWNER_USER_ID
     print(f"Logged in as {client.user} (id: {client.user.id})")
     print(f"Agentes disponíveis: {', '.join(AGENTS)}")
+    if OWNER_USER_ID is None:
+        OWNER_USER_ID = (await client.application_info()).owner.id
+    if not morning_briefing.is_running():
+        morning_briefing.start()
+        print(f"Resumos agendados para {BRIEFING_HOUR:02d}:{BRIEFING_MINUTE:02d} ({briefing.TZ}), DM para {OWNER_USER_ID}")
 
 
 @client.event
@@ -69,6 +108,16 @@ async def on_message(message: discord.Message):
 
     text = message.content.replace(f"<@{client.user.id}>", "").replace(f"<@!{client.user.id}>", "").strip()
     if not text:
+        return
+
+    if text in BRIEFING_COMMANDS:
+        # Your calendar and emails: only for you, and only in a private DM.
+        if message.author.id != OWNER_USER_ID or not is_dm:
+            await message.channel.send("Esse comando só funciona na DM do dono do bot.")
+            return
+        async with message.channel.typing():
+            for part in await build_messages(BRIEFING_COMMANDS[text]):
+                await send_chunks(message.channel, part)
         return
 
     if text == "!reset":
@@ -99,9 +148,7 @@ async def on_message(message: discord.Message):
     history.append({"role": "assistant", "content": reply_text})
     conversations[key] = history[-MAX_HISTORY_MESSAGES:]
 
-    # Discord caps messages at 2000 chars.
-    for i in range(0, len(reply_text), 1900):
-        await message.channel.send(reply_text[i:i + 1900])
+    await send_chunks(message.channel, reply_text)
 
 
 if __name__ == "__main__":

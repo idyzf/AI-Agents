@@ -6,8 +6,13 @@ services:
       - MODEL_NAME=qwen3.5:4b
       - OLLAMA_BASE_URL=http://host.docker.internal:11434/v1
       - ENABLE_THINKING=false
+      - TIMEZONE=America/Sao_Paulo
+      - BRIEFING_TIME=07:00
     env_file:
       - .env  # DISCORD_TOKEN=... and optionally ALLOWED_USER_IDS=123,456
+    volumes:
+      # Google token: mounted read-only, the container can't change it.
+      - ./secrets:/app/secrets:ro
     extra_hosts:
       - "host.docker.internal:host-gateway"
     mem_limit: 512m

@@ -8,3 +8,7 @@ python-dateutil
 pypdf
 docx2txt
 beautifulsoup4
+# Read-only Google Calendar + Gmail access
+google-api-python-client
+google-auth-oauthlib
+tzdata
