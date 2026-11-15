@@ -45,6 +45,8 @@ Todo dia às 7h (horário de Brasília), o bot manda por DM os eventos do dia e 
 4. No Mac, rode `pip3 install google-auth-oauthlib google-api-python-client` e depois `python3 auth_google.py`. Faça login e aprove o acesso somente-leitura.
 5. Reinicie o bot: `docker compose up --build`.
 
+**Mais de uma conta:** adicione a outra conta como usuária de teste no Google Cloud e rode `python3 auth_google.py <nome>`, por exemplo `python3 auth_google.py conta2`. Isso salva `secrets/token_<nome>.json`. O bot junta os eventos de todas as contas, mostrando de qual conta veio cada um, e separa os emails por conta. Não precisa reiniciar o bot.
+
 Enquanto o app estiver em modo "Testing" no Google, o login expira a cada 7 dias e é preciso rodar `auth_google.py` de novo. Para não expirar, mude o app para "In production". O Google vai mostrar um aviso de "app não verificado", que você pode aceitar, já que o app é seu.
 
 Se o Mac estiver dormindo às 7h, o resumo daquele dia não é enviado. Use `!bomdia` quando abrir o Mac.
