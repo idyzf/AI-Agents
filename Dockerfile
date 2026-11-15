@@ -10,8 +10,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY agent.py discord_bot.py ./
 
-# Run as an unprivileged user inside the container.
-RUN useradd --create-home bot
+# Run as an unprivileged user inside the container. qwen-agent writes a
+# ./workspace folder at startup, so the user needs to own /app.
+RUN useradd --create-home bot && chown bot /app
 USER bot
 
 ENV OLLAMA_BASE_URL=http://host.docker.internal:11434/v1

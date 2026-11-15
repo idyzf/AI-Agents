@@ -4,7 +4,7 @@ O Ollama roda **direto no Mac**, para usar a GPU do M1. Só o bot do Discord rod
 
 ## Primeira vez
 
-1. Instale e abra o Ollama: `brew install ollama` e depois `brew services start ollama`, ou instale o app de https://ollama.com
+1. Instale o Ollama (`brew install ollama`) e inicie com `./start-ollama.sh`. O script aplica limites de memória e não liga o Ollama sozinho no login.
 2. Baixe o modelo: `ollama pull qwen3.5:4b` (cerca de 3 GB). Para respostas melhores, use `qwen3.5:9b` (cerca de 6 GB de RAM) e troque `MODEL_NAME` no `docker-compose.yml`.
 3. Crie o `.env` com:
    ```
@@ -18,7 +18,7 @@ O Ollama roda **direto no Mac**, para usar a GPU do M1. Só o bot do Discord rod
 | | Ligar | Desligar |
 |---|---|---|
 | Bot | `docker compose up` | `Ctrl+C` ou `docker compose down` |
-| Ollama | `brew services start ollama` | `brew services stop ollama` (ou "Quit" no ícone do app) |
+| Ollama | `./start-ollama.sh` | `Ctrl+C` no terminal dele |
 
 O Ollama tira o modelo da memória depois de cerca de 5 minutos sem uso.
 
